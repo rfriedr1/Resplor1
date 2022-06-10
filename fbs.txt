@@ -1,0 +1,45 @@
+Hi Ronny,
+
+Also zum Compilieren, von build-system.fman.io/manual/  gelernt:
+
+
+Terminal Öffnen:
+
+- venv anlegen : python3 -m venv venv
+
+- Aktivieren (da hatte ich immer ein parameterfehler, lief aber trotzdem):
+
+  win:  call venv\scripts\activate.bat   
+  auf mac: source venv/bin/activate
+
+- pip install fbs PyQt5  -installieren
+
+- weitere abhängigkeiten installieren -mpl-toolkits mpldatacursor , pandas, numpy, matplotlib ,xlrd , xlsxwriter
+
+- danach Projekt anlegen
+
+  fbs startproject 
+
+
+Dann müssten die source und target ordner da sein (über/vor dem venv Ordner)
+
+- gewünschte main.py in src/main/python 
+- .ui files oder sonstige resourcen direkt neben den venv ordner bzw. die python.exe (glaube ich,kann auch sein,dass
+   sie in /main müssen)
+
+
+mit 'fbs run' kann man dann testen , 'fbs freeze' legt die exe im target folder an.
+
+wichtig für die fbs methode ist, dass am anfang des main.py scripts 
+
+' from fbs_runtime.application_context.PyQt5 import ApplicationContext ' importiert und die
+app auch als appcontext angeworfen wird:  
+
+'if __name__ == "__main__":
+	appctxt = ApplicationContext()
+	sys.exit(appctxt.app.exec_()) '
+
+
+Das war's  ..hoffe es läuft noch for free
+                         Beste Grüße
+                                    Robin 
