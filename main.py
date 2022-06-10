@@ -969,20 +969,24 @@ class Samplesheet(object):
 
         self.tempdf.to_sql('temptable', index=False, con=connection, if_exists='replace')
 
+        # depending on the type of file that was imported, decided what query to run
+        # in order to INSERT those data into the correct table
         if origin == 'metadata':
-            logger.debug('inserting metadata')
+            logger.debug('creating query for ' + origin)
             qry = "INSERT OR IGNORE INTO metadata (manr , name , fundland , fundort , fundplatz ,datierung, skelettelement ,tierart, geschlecht , bemerkung,mams,altermin )\
                             SELECT manr , name,fundland,fundort,fundplatz,datierung, skelettelement, tierart, geschlecht, bemerkung, mams,alterm FROM temptable"
             logger.debug(qry)
             tabletoload = 'metadata'
 
         if origin == 'templog':
+            logger.debug('creating query for ' + origin)
             qry = "INSERT OR IGNORE INTO temphumidtable (date,seconds,temp,humid) \
                                            SELECT date,seconds,temp,humid FROM temptable "
             logger.debug(qry)
             tabletoload = "temphumidtable"
 
         if origin == 'opmd':
+            logger.debug('creating query for ' + origin)
             qry = "INSERT OR IGNORE INTO opmd (idraw,superid ,name ,sampletype,finishdate, peakid ,time  ,width ,\
                                 height,area,ratio2928,ratio2928raw,ratio3028,ratio3028raw,c13gas,std13C,o18gas,bsC13gas ,c13gasdrift,c13,\
                                 stddiffc13,bsO18gas,o18gasdrift,o18vsmowmd,stddiffdO18,filename)\
@@ -992,18 +996,21 @@ class Samplesheet(object):
             tabletoload = "opmd"
 
         if origin == 'opod':
+            logger.debug('creating query for ' + origin)
             qry = "INSERT OR IGNORE INTO opod(id, name, finishdate,sampletype,opercent,oarea, height, o18gas, o18vsmowod ,filename)\
                                 SELECT id,name,finishdate,sampletype,opercent,oarea,height,o18gas,o18vsmow,filename FROM temptable"
             logger.debug(qry)
             tabletoload = "opod"
 
         if origin == 'cnmd':
+            logger.debug('creating query for ' + origin)
             qry = 'INSERT OR IGNORE INTO cnmd (notes,weight,ratio4544,idraw,superid,name,sampletype,finishdate,peakid,time,width,height,area,ratio2928,ratio2928raw,n15gas,n15aircali,ratio4544raw,ratio4644,ratio4644raw,c13gas,stdc13vpdb,c13gasdrift,c13vpdbcali,filename)\
                                 SELECT notes,weight,ratio4544,Id,superid,Name,SampleType,finishdate,PeakID,Time,Width,Height,IsoArea,ratio2928,ratio2928raw,N15gas,N15air,ratio4544raw,ratio4644,ratio4644raw,C13gas,stdC13,driftC13gas,C13vpdb ,filename FROM temptable'
             logger.debug(qry)
             tabletoload = "cnmd"
 
         if origin == 'cnod':
+            logger.debug('creating query for ' + origin)
             qry = "INSERT OR IGNORE INTO cnod(notes,weight,id,sampletype,name,finishdate,areac,cpercent,arean,npercent,nheight,nisoarea,n15gas,n15drift,n15air,cheight,cisoarea,c13gas,c13drift,c13vpdb,filename)\
                                                     SELECT notes,weight, id,sampletype,name,finishdate,areac,cpercent,arean,npercent,nheight,nisoarea,n15gas,n15drift,n15air,cheight,cisoarea,c13gas,c13drift,c13vpdb,filename FROM temptable"
             logger.debug(qry)
@@ -1015,15 +1022,16 @@ class Samplesheet(object):
             logger.debug('writing imported data to ' + tabletoload)
             logger.debug('try executing query')
             cursor.execute(qry)
-            logger.debug('try executing query...done')
+            logger.debug('try executing query...success')
         except Exception as e:
+            logger.debug('try executing query...failed')
             errmessage = 'Error while writing to DB: ' + str(e)
             logger.exception(errmessage)
             main.open_infodialog(errmessage)
 
-        # query that loads the whole table
+        # query that loads the whole table back into the dataframe
+        # in order to have all the recent data available in the "resultsdf"
         loadtable = '''SELECT * FROM ''' + tabletoload
-
         resultdf = read_sql(loadtable, con=connection, index_col=None, coerce_float=True, params=None, parse_dates=None,
                             columns=None, chunksize=None)
         # resultdf['id']= resultdf['id'].astype(int)
