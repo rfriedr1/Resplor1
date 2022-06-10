@@ -839,7 +839,7 @@ class Window(QDialog):
         c = connection.cursor()
         setrunid = "INSERT INTO opod(runid) VALUE " + runid
         c.execute(setrunid)
-        cursor.close()
+        c.close()
         connection.commit()
         print('runid inserted')
 
