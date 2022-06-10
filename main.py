@@ -962,44 +962,25 @@ class Samplesheet(object):
 
     def addtodb(self):
         logger.debug('perform function')
-        logger.debug('inserting data into DB')
+        logger.debug('Inserting imported data into DB')
         origin = self.origin
         connection = sqlite3.connect(database)
         cursor = connection.cursor()
 
         self.tempdf.to_sql('temptable', index=False, con=connection, if_exists='replace')
-        print('reached add')
+
         if origin == 'metadata':
             logger.debug('inserting metadata')
             qry = "INSERT OR IGNORE INTO metadata (manr , name , fundland , fundort , fundplatz ,datierung, skelettelement ,tierart, geschlecht , bemerkung,mams,altermin )\
                             SELECT manr , name,fundland,fundort,fundplatz,datierung, skelettelement, tierart, geschlecht, bemerkung, mams,alterm FROM temptable"
             logger.debug(qry)
             tabletoload = 'metadata'
-            print('goes in metadata')
-            try:
-                logger.debug('try executing query')
-                cursor.execute(qry)
-                logger.debug('try executing query...done')
-            except Exception as e:
-                errmessage = 'Error while writing to DB: ' + str(e)
-                logger.exception(errmessage)
-                main.open_infodialog(errmessage)
-
 
         if origin == 'templog':
             qry = "INSERT OR IGNORE INTO temphumidtable (date,seconds,temp,humid) \
                                            SELECT date,seconds,temp,humid FROM temptable "
             logger.debug(qry)
             tabletoload = "temphumidtable"
-            print('goes in temphumidtable')
-            try:
-                logger.debug('try executing query')
-                cursor.execute(qry)
-                logger.debug('try executing query...done')
-            except Exception as e:
-                errmessage = 'Error while writing to DB: ' + str(e)
-                logger.exception(errmessage)
-                main.open_infodialog(errmessage)
 
         if origin == 'opmd':
             qry = "INSERT OR IGNORE INTO opmd (idraw,superid ,name ,sampletype,finishdate, peakid ,time  ,width ,\
@@ -1009,61 +990,38 @@ class Samplesheet(object):
                                 O18gas,bsC13gas,C13gasdrift,C13vpdb,stddiffC13,bsO18gas,O18gasdrift,O18vsmowmd,stddiffdO18,filename FROM temptable"
             logger.debug(qry)
             tabletoload = "opmd"
-            print('goes in rawtabletableco')
-            try:
-                logger.debug('try executing query')
-                cursor.execute(qry)
-                logger.debug('try executing query...done')
-            except Exception as e:
-                errmessage = 'Error while writing to DB: ' + str(e)
-                logger.exception(errmessage)
-                main.open_infodialog(errmessage)
 
         if origin == 'opod':
             qry = "INSERT OR IGNORE INTO opod(id, name, finishdate,sampletype,opercent,oarea, height, o18gas, o18vsmowod ,filename)\
                                 SELECT id,name,finishdate,sampletype,opercent,oarea,height,o18gas,o18vsmow,filename FROM temptable"
             logger.debug(qry)
             tabletoload = "opod"
-            print('goes in opod')
-            try:
-                logger.debug('try executing query')
-                cursor.execute(qry)
-                logger.debug('try executing query...done')
-            except Exception as e:
-                errmessage = 'Error while writing to DB: ' + str(e)
-                logger.exception(errmessage)
-                main.open_infodialog(errmessage)
 
         if origin == 'cnmd':
             qry = 'INSERT OR IGNORE INTO cnmd (notes,weight,ratio4544,idraw,superid,name,sampletype,finishdate,peakid,time,width,height,area,ratio2928,ratio2928raw,n15gas,n15aircali,ratio4544raw,ratio4644,ratio4644raw,c13gas,stdc13vpdb,c13gasdrift,c13vpdbcali,filename)\
                                 SELECT notes,weight,ratio4544,Id,superid,Name,SampleType,finishdate,PeakID,Time,Width,Height,IsoArea,ratio2928,ratio2928raw,N15gas,N15air,ratio4544raw,ratio4644,ratio4644raw,C13gas,stdC13,driftC13gas,C13vpdb ,filename FROM temptable'
             logger.debug(qry)
             tabletoload = "cnmd"
-            print('goes in cnmd')
-            try:
-                logger.debug('try executing query')
-                cursor.execute(qry)
-                logger.debug('try executing query...done')
-            except Exception as e:
-                errmessage = 'Error while writing to DB: ' + str(e)
-                logger.exception(errmessage)
-                main.open_infodialog(errmessage)
 
         if origin == 'cnod':
             qry = "INSERT OR IGNORE INTO cnod(notes,weight,id,sampletype,name,finishdate,areac,cpercent,arean,npercent,nheight,nisoarea,n15gas,n15drift,n15air,cheight,cisoarea,c13gas,c13drift,c13vpdb,filename)\
                                                     SELECT notes,weight, id,sampletype,name,finishdate,areac,cpercent,arean,npercent,nheight,nisoarea,n15gas,n15drift,n15air,cheight,cisoarea,c13gas,c13drift,c13vpdb,filename FROM temptable"
             logger.debug(qry)
             tabletoload = "cnod"
-            print('goes in cnod')
-            try:
-                logger.debug('try executing query')
-                cursor.execute(qry)
-                logger.debug('try executing query...done')
-            except Exception as e:
-                errmessage = 'Error while writing to DB: ' + str(e)
-                logger.exception(errmessage)
-                main.open_infodialog(errmessage)
+        
+        # now run the query that was created above according to the type of excel file
+        try:
+            print('writing imported data to ' + tabletoload)
+            logger.debug('writing imported data to ' + tabletoload)
+            logger.debug('try executing query')
+            cursor.execute(qry)
+            logger.debug('try executing query...done')
+        except Exception as e:
+            errmessage = 'Error while writing to DB: ' + str(e)
+            logger.exception(errmessage)
+            main.open_infodialog(errmessage)
 
+        # query that loads the whole table
         loadtable = '''SELECT * FROM ''' + tabletoload
 
         resultdf = read_sql(loadtable, con=connection, index_col=None, coerce_float=True, params=None, parse_dates=None,
@@ -1074,8 +1032,9 @@ class Samplesheet(object):
         cursor.close()
         connection.commit()
 
+        # display a table that shows the imported data 
         self.origin = origin
-        model = PandasModel(self.tempdf)
+        model = PandasModel(self.tempdf)    # that's the model that is behind the table
         head, tail = os.path.split(self.file)
         main.open_new_dialog(tail, origin, model)
 
