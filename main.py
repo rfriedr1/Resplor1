@@ -1739,8 +1739,12 @@ class MyTableWidget(QWidget):
         self.setLayout(self.layout)
 
 class StandardsFrame(object):
+    '''
+    Window that displays the standards in multiple plots
+    '''
     def initUI(self, mainwindow):
         logger.debug('perform function')
+        logger.debug('generating UI for Standards Window')
         mainwindow.setWindowTitle(mainwindow.title)
         #mainwindow.resize(1400, 900)
 
@@ -1791,11 +1795,10 @@ class StandardsFrame(object):
         policy = mainwindow.dropdown.sizePolicy()
         policy.setHorizontalPolicy(QSizePolicy.Expanding)
         mainwindow.dropdown.setSizePolicy(policy)
-
-        daylist =['60','90','180','360','720']
+        daylist =['60','90','180','360','720']  # days of data that should be displayed
         mainwindow.dropdown.addItems(daylist)
-
         mainwindow.dropdown.currentIndexChanged.connect(lambda: mainwindow.daychanged(mainwindow.dropdown.currentText()))
+        
         mainwindow.vbox.addWidget(mainwindow.cnframe)
         mainwindow.vbox.addWidget(mainwindow.cnframe2)
         mainwindow.vbox.addWidget(mainwindow.opframe)
@@ -1808,6 +1811,7 @@ class StandardsFrame(object):
         mainwindow.dropdown.hide()
         mainwindow.daylabel.hide()
 
+        # list of standards that will be filtered out and their various spellings
         ag3 = ['Ag3PO4']
         benz = ['Benzoic Acid', 'benzoic acid', 'benzoic acid end', 'Benzoic Acid End', 'benz', 'Benz']
         iaea601 = ['IAEA 601', 'IAEA-601', 'iaea 601', 'iaea-601']
@@ -1827,7 +1831,6 @@ class StandardsFrame(object):
         iaeach7 = ['IAEA CH7', 'IAEA-CH7', 'iaea ch7', 'iaea-ch7', 'iaea-ch-7', 'IAEA-CH-7', 'IAEA CH-7', 'iaea ch-7']
         iaean1 = ['IAEA N1', 'IAEA-N1', 'iaea n1', 'iaea-n1', 'iaea-n-1', 'IAEA-N-1', 'IAEA N-1', 'iaea n-1']
         iaean2 = ['IAEA N2', 'IAEA-N2', 'iaea n2', 'iaea-n2', 'iaea-n-2', 'IAEA-N-2', 'IAEA N-2', 'iaea n-2']
-
         iaeano3 = ['IAEA-NO-3','IAEA NO3', 'iaea no3', 'iaea-no3', 'IAEA-N-O3', 'IAEA N-O3', 'iaea-n-O3']
 
         mainwindow.ag3po4 = GroupBox(ag3, '21.7', typ='CO', parent=mainwindow.opframe)
@@ -1853,7 +1856,7 @@ class StandardsFrame(object):
 
         mainwindow.canvas = MyCanvas(width=14, height=8, parent=mainwindow.stdzoomframe)
         # mainwindow.mousePressEvent = mainwindow.closestdzoom
-        mainwindow.canvas.mouseDoubleClickEvent = mainwindow.close_zoomframe
+        mainwindow.canvas.mouseDoubleClickEvent = mainwindow.close_zoomframe    # when double click on plot close plot
         mainwindow.canvas.setToolTip('Zum Schließen -Doppelklick')
         self.toolbar = NavigationToolbar(mainwindow.canvas, mainwindow.canvas)
 
@@ -2280,11 +2283,12 @@ class oQLabel(QLabel):
 class GroupBox(QGroupBox):
     def __init__(self, name, sollwert, typ, sollwert2=None, parent=None):
         logger.debug('perform function')
+        logger.debug('generating standards groupbox with: name=' + name[0] + ', sollwert=' + sollwert + ', typ=' + typ)
         super(GroupBox, self).__init__(parent)
         self.typ = typ
         self.figure = plt.figure(dpi=dpi)
         self.canvas = FigureCanvas(self.figure)
-        self.canvas.setToolTip('Achtung GASWERTPLOT ! Nicht mit korrigierten Werten (ohne/mit drift) verwechseln !!')
+        self.canvas.setToolTip('Achtung Gaswerte sind geplottet! Nicht mit normierten Werten (ohne/mit drift) verwechseln!!')
 
         self.sollwert = sollwert
         self.sollwert2 = sollwert2
