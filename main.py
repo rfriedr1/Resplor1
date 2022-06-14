@@ -1771,25 +1771,26 @@ class StandardsFrame(object):
         mainwindow.filenamebox.addItems(mainwindow.items)
 
         mainwindow.figure = plt.figure()
-
         mainwindow.figure.set_facecolor("lightyellow")
-        mainwindow.hbox.addWidget(mainwindow.filenamebox)
 
+        mainwindow.hbox.addWidget(mainwindow.filenamebox)
         mainwindow.vbox.addLayout(mainwindow.hbox)
         # mainwindow.vbox.addWidget(mainwindow.switchbtn)
 
-        mainwindow.cnframe = QFrame(mainwindow)
-        mainwindow.cnframe2 = QFrame(mainwindow)
-        mainwindow.opframe = QFrame(mainwindow)
-        mainwindow.stdzoomframe = QFrame(mainwindow)
+        mainwindow.cnframe = QFrame(mainwindow)     # frame that holds the CN-Data when a CN run is selected
+        mainwindow.cnframe2 = QFrame(mainwindow)     # frame that holds the CN-Data when a CN run is selected
+        mainwindow.opframe = QFrame(mainwindow)     # frame that holds the Oxygen-Data when a O run is selected
+        mainwindow.stdzoomframe = QFrame(mainwindow)  # this is the fram that is shown at the bottom of the standards window holding detailed data
 
+        # define the different layouts depending on the data and whether they are Cn or O Data
         self.ly = QGridLayout(mainwindow.cnframe)
         self.ly2 = QGridLayout(mainwindow.opframe)
         self.ly3 = QGridLayout(mainwindow.cnframe2)
         self.ly3.setColumnStretch(1, 1)
         self.ly3.setRowStretch(1, 1)
-        self.ly4 = QVBoxLayout(mainwindow.stdzoomframe)
+        self.ly4 = QVBoxLayout(mainwindow.stdzoomframe)  # layout of the detailed data
 
+        # dropdown list that defines the number of past days to be plotted
         mainwindow.daylabel = QLabel('Days')
         mainwindow.dropdown = QComboBox(mainwindow.stdzoomframe)
         policy = mainwindow.dropdown.sizePolicy()
@@ -1799,6 +1800,7 @@ class StandardsFrame(object):
         mainwindow.dropdown.addItems(daylist)
         mainwindow.dropdown.currentIndexChanged.connect(lambda: mainwindow.daychanged(mainwindow.dropdown.currentText()))
         
+        # insert widgets into the layout of the window
         mainwindow.vbox.addWidget(mainwindow.cnframe)
         mainwindow.vbox.addWidget(mainwindow.cnframe2)
         mainwindow.vbox.addWidget(mainwindow.opframe)
@@ -1833,6 +1835,7 @@ class StandardsFrame(object):
         iaean2 = ['IAEA N2', 'IAEA-N2', 'iaea n2', 'iaea-n2', 'iaea-n-2', 'IAEA-N-2', 'IAEA N-2', 'iaea n-2']
         iaeano3 = ['IAEA-NO-3','IAEA NO3', 'iaea no3', 'iaea-no3', 'IAEA-N-O3', 'IAEA N-O3', 'iaea-n-O3']
 
+        # bulding groupboxes for each standard with the plot of the recent data and the sollwerte 
         mainwindow.ag3po4 = GroupBox(ag3, '21.7', typ='CO', parent=mainwindow.opframe)
         mainwindow.benzoic = GroupBox(benz, '23.37', typ='CO', parent=mainwindow.opframe)
         mainwindow.iaea601 = GroupBox(iaea601, '23.3', typ='CO', parent=mainwindow.opframe)
@@ -1860,6 +1863,7 @@ class StandardsFrame(object):
         mainwindow.canvas.setToolTip('Zum Schließen -Doppelklick')
         self.toolbar = NavigationToolbar(mainwindow.canvas, mainwindow.canvas)
 
+        # layout for Oxygen mode
         self.ly2.addWidget(mainwindow.ag3po4, 0, 0)
         self.ly2.addWidget(mainwindow.benzoic, 0, 1)
         self.ly2.addWidget(mainwindow.sudan, 0, 2)
@@ -1870,6 +1874,7 @@ class StandardsFrame(object):
         self.ly2.addWidget(mainwindow.nbs, 1, 2)
         self.ly2.addWidget(mainwindow.nbsi, 2, 2)
 
+        #layout for Cn mode
         self.ly.addWidget(mainwindow.sulfanil, 1, 2)
         self.ly.addWidget(mainwindow.usgs40, 0, 0)
         self.ly.addWidget(mainwindow.usgs41, 0, 1)
@@ -1880,17 +1885,20 @@ class StandardsFrame(object):
         self.ly3.addWidget(mainwindow.iaean2, 0, 1)
         self.ly3.addWidget(mainwindow.iaeano3, 0, 2)
 
+        # layout for the detial plot of one single standard
         self.ly4.addWidget(mainwindow.canvas)
         self.ly4.addWidget(mainwindow.dropdown)
         self.ly4.addWidget(mainwindow.daylabel)
 
         mainwindow.layout.addLayout(mainwindow.vbox)
 
+        # hide the layouts that are not needed
         mainwindow.opframe.hide()
         mainwindow.cnframe.hide()
         mainwindow.cnframe2.hide()
         mainwindow.stdzoomframe.hide()
 
+        # load data
         mainwindow.loadsheet()
         mainwindow.filenamebox.currentIndexChanged.connect(lambda: mainwindow.loadsheet())
         mainwindow.filenamebox.currentIndexChanged.connect(lambda: mainwindow.calculatesheet())
@@ -2036,7 +2044,11 @@ class SampleDialog(QMainWindow):
         return moredatadf
 
     def loadsheet(self):
+        '''
+        main function that loads data from the database
+        '''
         logger.debug('perform function')
+        logger.debug('loading data that belong to the selected run')
 
         # figure out what run data to load according to the selected run in the window
         self.curtext = self.filenamebox.currentText()   #Name of the runfile selected in the window
