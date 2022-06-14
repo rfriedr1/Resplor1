@@ -1,5 +1,5 @@
 In order to create a requirements file of the current virtual environment:
     pip freeze > requirements.txt
 
-installing all teh rquierments back into a virtual environment:
+installing all the requirements back into a virtual environment:
     install -r requirements.txt
