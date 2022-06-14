@@ -1922,7 +1922,6 @@ class ProgressThread(QThread):
 
 
 class LoadDialog(QDialog):
-
     def __init__(self,parent=None):
         logger.debug('perform function')
         super(LoadDialog, self).__init__(parent)
@@ -1948,7 +1947,6 @@ class LoadDialog(QDialog):
 
 
 class SampleDialog(QMainWindow):
-
     def __init__(self, parent):
         logger.debug('perform function')
         super(SampleDialog, self).__init__(parent)
@@ -2028,7 +2026,6 @@ class SampleDialog(QMainWindow):
         self.items = self.get_filenames()
         self.filenamebox.addItems(self.items)
         #self.filenamebox.setCurrentIndex(-1)
-
 
     def loadmoredata(self, name):
         logger.debug('perform function')
